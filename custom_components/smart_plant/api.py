@@ -1,7 +1,6 @@
-"""API client for OpenPlantbook."""
 import logging
+import asyncio
 import aiohttp
-import async_timeout
 
 from .const import OPB_BASE_URL, OPB_TOKEN_URL
 
@@ -12,30 +11,34 @@ class OpenPlantbookAPI:
 
     def __init__(self, client_id: str, client_secret: str, session: aiohttp.ClientSession):
         """Initialize the API client."""
-        self.client_id = client_id
-        self.client_secret = client_secret
+        self.client_id = client_id.strip()
+        self.client_secret = client_secret.strip()
         self.session = session
         self.access_token = None
 
     async def authenticate(self) -> bool:
         """Authenticate with OpenPlantbook."""
+        _LOGGER.debug("Attempting to authenticate with OpenPlantbook at %s", OPB_TOKEN_URL)
         try:
             data = {
                 "grant_type": "client_credentials",
                 "client_id": self.client_id,
                 "client_secret": self.client_secret,
             }
-            async with async_timeout.timeout(10):
+            async with asyncio.timeout(10):
                 response = await self.session.post(OPB_TOKEN_URL, data=data)
+                _LOGGER.debug("OPB auth response status: %s", response.status)
                 if response.status == 200:
                     result = await response.json()
                     self.access_token = result.get("access_token")
+                    _LOGGER.debug("Successfully authenticated with OpenPlantbook")
                     return True
                 else:
-                    _LOGGER.error("Failed to authenticate with OpenPlantbook: %s", response.status)
+                    text = await response.text()
+                    _LOGGER.error("Failed to authenticate with OpenPlantbook: %s - %s", response.status, text)
                     return False
         except Exception as err:
-            _LOGGER.error("Error authenticating with OpenPlantbook: %s", err)
+            _LOGGER.exception("Error authenticating with OpenPlantbook: %s", err)
             return False
 
     async def search_plants(self, query: str):
@@ -47,7 +50,7 @@ class OpenPlantbookAPI:
         params = {"alias": query}
         
         try:
-            async with async_timeout.timeout(10):
+            async with asyncio.timeout(10):
                 response = await self.session.get(f"{OPB_BASE_URL}/plant/search", headers=headers, params=params)
                 if response.status == 200:
                     result = await response.json()
@@ -69,7 +72,7 @@ class OpenPlantbookAPI:
         headers = {"Authorization": f"Bearer {self.access_token}"}
         
         try:
-            async with async_timeout.timeout(10):
+            async with asyncio.timeout(10):
                 response = await self.session.get(f"{OPB_BASE_URL}/plant/detail/{pid}", headers=headers)
                 if response.status == 200:
                     return await response.json()
