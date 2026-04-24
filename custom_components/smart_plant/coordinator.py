@@ -79,8 +79,24 @@ class SmartPlantCoordinator(DataUpdateCoordinator):
         }
 
     async def mark_watered(self):
-        """Mark the plant as watered."""
+        """Mark the plant as watered and learn the pattern."""
         now = dt_util.now()
+        
+        # Adaptive learning: Calculate actual days since last watering
+        if self.last_watered:
+            actual_delta = (now - self.last_watered).days
+            if actual_delta > 0:
+                # Weighted average: 80% current interval, 20% new observation
+                # This makes it learn slowly and stay stable
+                new_interval = round((self.days_between_waterings * 0.8) + (actual_delta * 0.2))
+                # Keep it within reasonable bounds
+                new_interval = max(1, min(60, new_interval))
+                
+                if new_interval != self.days_between_waterings:
+                    _LOGGER.info("Smart Plant %s: Learning new interval: %s -> %s days", 
+                                 self.name, self.days_between_waterings, new_interval)
+                    self.days_between_waterings = new_interval
+
         self.last_watered = now
         
         # Update history
