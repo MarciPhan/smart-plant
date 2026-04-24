@@ -78,6 +78,9 @@ class SmartPlantConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._search_results = await api.search_plants(search_query)
             if not self._search_results:
                 errors["base"] = "no_plants_found"
+            elif len(self._search_results) == 1:
+                # Only one result, skip selection
+                return await self.async_step_select_species({"pid": self._search_results[0]["pid"]})
             else:
                 return await self.async_step_select_species()
 
