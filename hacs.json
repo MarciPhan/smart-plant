@@ -1,0 +1,6 @@
+{
+  "name": "Smart Plant",
+  "render_readme": true,
+  "country": ["CZ"],
+  "homeassistant": "2023.1.0"
+}
