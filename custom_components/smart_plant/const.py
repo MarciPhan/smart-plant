@@ -8,7 +8,7 @@ CONF_PLANTS = "plants"
 
 # OpenPlantbook API constants
 OPB_BASE_URL = "https://open.plantbook.io/api/v1"
-OPB_TOKEN_URL = "https://open.plantbook.io/token/"
+OPB_TOKEN_URL = "https://open.plantbook.io/api/v1/token/"
 
 # Data keys
 DATA_COORDINATOR = "coordinator"
