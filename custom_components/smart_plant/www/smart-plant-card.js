@@ -100,17 +100,35 @@ class SmartPlantCard extends HTMLElement {
     this.querySelector('#plant-image').src = imgUrl || "/static/images/card_media_placeholder.png";
     this.querySelector('#next-watering').textContent = nextWateringState ? this._formatDate(nextWateringState.state) : "Neznámo";
     
-    const healthMap = { "Excellent": "Výborné", "Very Good": "Velmi dobré", "Good": "Dobré", "Fair": "Ucházející", "Poor": "Špatné", "Critical": "Kritické", "Needs attention": "Vyžaduje péči" };
+    const healthMap = {
+      "Excellent": "Ukázková",
+      "Very Good": "Prosperující",
+      "Good": "Spokojená",
+      "Fair": "Stagnující",
+      "Poor": "Chřadnoucí",
+      "Critical": "Skomírající",
+      "Needs attention": "Skomírající",
+      "Výborné": "Ukázková",
+      "Velmi dobré": "Prosperující",
+      "Dobré": "Spokojená",
+      "Ucházející": "Stagnující",
+      "Špatné": "Chřadnoucí",
+      "Kritické": "Skomírající"
+    };
     let healthStr = healthState ? healthState.state : "Neznámo";
     healthStr = healthMap[healthStr] || healthStr;
     this.querySelector('#health-status').textContent = healthStr;
     
     const healthIcon = this.querySelector('#health-icon');
     if (healthState) {
-      const h = healthState.state.toLowerCase();
-      if (h.includes('excellent') || h.includes('výborné')) healthIcon.style.color = '#4caf50';
-      else if (h.includes('good') || h.includes('dobré')) healthIcon.style.color = '#8bc34a';
-      else healthIcon.style.color = '#f44336';
+      const h = healthStr.toLowerCase();
+      if (h === 'ukázková' || h === 'prosperující') healthIcon.style.color = '#4caf50'; // Zelená
+      else if (h === 'spokojená') healthIcon.style.color = '#8bc34a'; // Světle zelená
+      else if (h === 'stagnující') healthIcon.style.color = '#ffeb3b'; // Žlutá
+      else if (h === 'chřadnoucí') healthIcon.style.color = '#ff9800'; // Oranžová
+      else if (h === 'skomírající') healthIcon.style.color = '#f44336'; // Červená
+      else if (h === 'kompost') healthIcon.style.color = '#9e9e9e'; // Šedá
+      else healthIcon.style.color = '#fff';
     }
 
     const careTipsContainer = this.querySelector('#care-tips-container');

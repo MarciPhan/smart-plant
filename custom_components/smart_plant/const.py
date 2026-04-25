@@ -73,12 +73,13 @@ LOCAL_PLANTS = {
 }
 
 # Health states
-HEALTH_EXCELLENT = "Výborné"
-HEALTH_VERY_GOOD = "Velmi dobré"
-HEALTH_GOOD = "Dobré"
-HEALTH_FAIR = "Ucházející"
-HEALTH_POOR = "Špatné"
-HEALTH_CRITICAL = "Kritické"
+HEALTH_EXCELLENT = "Ukázková"
+HEALTH_VERY_GOOD = "Prosperující"
+HEALTH_GOOD = "Spokojená"
+HEALTH_FAIR = "Stagnující"
+HEALTH_POOR = "Chřadnoucí"
+HEALTH_CRITICAL = "Skomírající"
+HEALTH_DEAD = "kompost"
 
 HEALTH_STATES = [
     HEALTH_EXCELLENT,
@@ -87,4 +88,5 @@ HEALTH_STATES = [
     HEALTH_FAIR,
     HEALTH_POOR,
     HEALTH_CRITICAL,
+    HEALTH_DEAD,
 ]

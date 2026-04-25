@@ -34,7 +34,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if "lovelace" in hass.data:
             resources = hass.data["lovelace"].get("resources")
             if resources and hasattr(resources, "async_items"):
-                url = "/smart_plant_static/smart-plant-card.js?v=2"
+                url = "/smart_plant_static/smart-plant-card.js?v=3"
                 if not any(res.get("url") == url for res in resources.async_items()):
                     await resources.async_create_item({"res_type": "module", "url": url})
                     _LOGGER.info("Successfully registered Smart Plant Card Lovelace resource")
