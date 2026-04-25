@@ -79,7 +79,7 @@ class SmartPlantCareTipsSensor(SmartPlantEntity, SensorEntity):
         else:
             tips.append("🌡️ Pokojová (18-24°C)")
             
-        return " | ".join(tips)
+        return "\n".join(tips)
 
     @property
     def extra_state_attributes(self):

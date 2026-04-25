@@ -34,7 +34,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if "lovelace" in hass.data:
             resources = hass.data["lovelace"].get("resources")
             if resources and hasattr(resources, "async_items"):
-                url = "/smart_plant_static/smart-plant-card.js?v=3"
+                url = "/smart_plant_static/smart-plant-card.js?v=4"
                 if not any(res.get("url") == url for res in resources.async_items()):
                     await resources.async_create_item({"res_type": "module", "url": url})
                     _LOGGER.info("Successfully registered Smart Plant Card Lovelace resource")
@@ -76,7 +76,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                         f.write(data)
                 await hass.async_add_executor_job(write_file)
                 
-                await coordinator.async_copy_custom_image(save_path)
+                # Zabrání SameFileError tím, že rovnou nastaví URL
+                url = f"/smart_plant_static/{filename}"
+                await coordinator.set_custom_image(url)
             elif file_path:
                 await coordinator.async_copy_custom_image(file_path)
 

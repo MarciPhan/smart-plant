@@ -35,7 +35,7 @@ class SmartPlantCard extends HTMLElement {
                 </div>
                 <button id="water-button" class="water-btn">
                   <ha-icon icon="mdi:water-pump"></ha-icon>
-                  Rostlina zalita
+                  Květina zalita
                 </button>
               </div>
             </div>
@@ -52,7 +52,7 @@ class SmartPlantCard extends HTMLElement {
             .overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent, rgba(0,0,0,0.85)); color: white; display: flex; flex-direction: column; gap: 12px; }
             .header h2 { margin: 0; font-size: 1.6rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
             .header p { margin: 0; font-size: 0.9rem; opacity: 0.8; font-style: italic; }
-            .care-tips { display: flex; align-items: flex-start; gap: 6px; font-size: 0.85rem; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 8px; backdrop-filter: blur(4px); }
+            .care-tips { display: flex; align-items: flex-start; gap: 6px; font-size: 0.85rem; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 8px; backdrop-filter: blur(4px); white-space: pre-line; line-height: 1.4; }
             .care-tips ha-icon { --mdc-icon-size: 16px; flex-shrink: 0; margin-top: 2px; }
             .stats { display: flex; gap: 16px; flex-wrap: wrap; }
             .stat { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; font-weight: 500; }
@@ -181,30 +181,58 @@ class SmartPlantCard extends HTMLElement {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = async (e) => {
-      const base64Data = e.target.result;
-      this.querySelector('#plant-image').src = base64Data;
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
 
-      try {
-        await this._hass.callService('smart_plant', 'upload_image', {
-          entity_id: [this._config.entity],
-          image_data: base64Data
-        });
-        const ev = new CustomEvent('hass-notification', {
-          detail: { message: "Fotografie nahrána 📷" },
-          bubbles: true,
-          composed: true,
-        });
-        this.dispatchEvent(ev);
-      } catch (err) {
-        console.error("Failed to upload image:", err);
-        const ev = new CustomEvent('hass-notification', {
-          detail: { message: "Nahrání obrázku se nezdařilo ❌" },
-          bubbles: true,
-          composed: true,
-        });
-        this.dispatchEvent(ev);
-      }
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Komprese do JPEG 80% kvalita
+        const base64Data = canvas.toDataURL('image/jpeg', 0.8);
+        this.querySelector('#plant-image').src = base64Data;
+
+        try {
+          await this._hass.callService('smart_plant', 'upload_image', {
+            entity_id: [this._config.entity],
+            image_data: base64Data
+          });
+          const ev = new CustomEvent('hass-notification', {
+            detail: { message: "Fotografie nahrána 📷" },
+            bubbles: true,
+            composed: true,
+          });
+          this.dispatchEvent(ev);
+        } catch (err) {
+          console.error("Failed to upload image:", err);
+          const ev = new CustomEvent('hass-notification', {
+            detail: { message: "Nahrání obrázku se nezdařilo (možná je soubor stále příliš velký) ❌" },
+            bubbles: true,
+            composed: true,
+          });
+          this.dispatchEvent(ev);
+        }
+      };
+      img.src = e.target.result;
     };
     reader.readAsDataURL(file);
   }
