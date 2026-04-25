@@ -35,7 +35,7 @@ class SmartPlantCard extends HTMLElement {
                 </div>
                 <button id="water-button" class="water-btn">
                   <ha-icon icon="mdi:water-pump"></ha-icon>
-                  Květina zalita
+                  Rostlina zalita
                 </button>
               </div>
             </div>
