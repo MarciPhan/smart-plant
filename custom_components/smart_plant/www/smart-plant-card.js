@@ -1,4 +1,3 @@
-
 class SmartPlantCard extends HTMLElement {
   set hass(hass) {
     if (!this.content) {
@@ -8,7 +7,6 @@ class SmartPlantCard extends HTMLElement {
             <div class="image-container">
               <img id="plant-image" src="" alt="Rostlina">
               
-              <!-- Tlačítko pro nahrání fotky -->
               <div class="upload-btn-container" title="Změnit fotku">
                 <ha-icon icon="mdi:camera-plus"></ha-icon>
                 <input type="file" id="image-upload" accept="image/*" />
@@ -20,7 +18,6 @@ class SmartPlantCard extends HTMLElement {
                   <p id="plant-species"></p>
                 </div>
                 
-                <!-- Nový blok pro rady k péči -->
                 <div class="care-tips" id="care-tips-container" style="display: none;">
                   <ha-icon icon="mdi:information-outline"></ha-icon>
                   <span id="care-tips"></span>
@@ -44,135 +41,25 @@ class SmartPlantCard extends HTMLElement {
             </div>
           </div>
           <style>
-            ha-card {
-              overflow: hidden;
-              border-radius: 16px;
-              background: var(--card-background-color);
-              position: relative;
-              height: 100%;
-            }
-            .container {
-              position: relative;
-              width: 100%;
-              aspect-ratio: 4 / 5;
-            }
-            .image-container {
-              position: absolute;
-              top: 0; left: 0; width: 100%; height: 100%;
-            }
-            #plant-image {
-              width: 100%;
-              height: 100%;
-              object-fit: cover;
-              transition: transform 0.5s ease;
-            }
-            .container:hover #plant-image {
-              transform: scale(1.05);
-            }
-            .upload-btn-container {
-              position: absolute;
-              top: 12px;
-              right: 12px;
-              background: rgba(0,0,0,0.5);
-              border-radius: 50%;
-              width: 40px;
-              height: 40px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              color: white;
-              cursor: pointer;
-              transition: all 0.2s ease;
-              z-index: 10;
-              backdrop-filter: blur(4px);
-            }
-            .upload-btn-container:hover {
-              background: rgba(0,0,0,0.8);
-              transform: scale(1.1);
-            }
-            #image-upload {
-              position: absolute;
-              top: 0; left: 0; width: 100%; height: 100%;
-              opacity: 0;
-              cursor: pointer;
-            }
-            .overlay {
-              position: absolute;
-              bottom: 0; left: 0; right: 0;
-              padding: 20px;
-              background: linear-gradient(transparent, rgba(0,0,0,0.85));
-              color: white;
-              display: flex;
-              flex-direction: column;
-              gap: 12px;
-            }
-            .header h2 {
-              margin: 0;
-              font-size: 1.6rem;
-              font-weight: 700;
-              text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            }
-            .header p {
-              margin: 0;
-              font-size: 0.9rem;
-              opacity: 0.8;
-              font-style: italic;
-            }
-            .care-tips {
-              display: flex;
-              align-items: flex-start;
-              gap: 6px;
-              font-size: 0.85rem;
-              background: rgba(0,0,0,0.4);
-              padding: 8px;
-              border-radius: 8px;
-              backdrop-filter: blur(4px);
-            }
-            .care-tips ha-icon {
-              --mdc-icon-size: 16px;
-              flex-shrink: 0;
-              margin-top: 2px;
-            }
-            .stats {
-              display: flex;
-              gap: 16px;
-              flex-wrap: wrap;
-            }
-            .stat {
-              display: flex;
-              align-items: center;
-              gap: 6px;
-              font-size: 0.9rem;
-              font-weight: 500;
-            }
-            .stat ha-icon {
-              --mdc-icon-size: 18px;
-            }
-            .water-btn {
-              background: #03a9f4;
-              color: white;
-              border: none;
-              padding: 10px 16px;
-              border-radius: 12px;
-              font-weight: 600;
-              font-size: 0.95rem;
-              cursor: pointer;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              gap: 8px;
-              transition: all 0.2s ease;
-              box-shadow: 0 4px 12px rgba(3, 169, 244, 0.3);
-              margin-top: 4px;
-            }
-            .water-btn:hover {
-              background: #039be5;
-              transform: translateY(-2px);
-              box-shadow: 0 6px 16px rgba(3, 169, 244, 0.4);
-            }
-            .water-btn:active {
-              transform: translateY(0);
-            }
+            ha-card { overflow: hidden; border-radius: 16px; background: var(--card-background-color); position: relative; height: 100%; }
+            .container { position: relative; width: 100%; aspect-ratio: 4 / 5; }
+            .image-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+            #plant-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+            .container:hover #plant-image { transform: scale(1.05); }
+            .upload-btn-container { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; transition: all 0.2s ease; z-index: 10; backdrop-filter: blur(4px); }
+            .upload-btn-container:hover { background: rgba(0,0,0,0.8); transform: scale(1.1); }
+            #image-upload { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+            .overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent, rgba(0,0,0,0.85)); color: white; display: flex; flex-direction: column; gap: 12px; }
+            .header h2 { margin: 0; font-size: 1.6rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+            .header p { margin: 0; font-size: 0.9rem; opacity: 0.8; font-style: italic; }
+            .care-tips { display: flex; align-items: flex-start; gap: 6px; font-size: 0.85rem; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 8px; backdrop-filter: blur(4px); }
+            .care-tips ha-icon { --mdc-icon-size: 16px; flex-shrink: 0; margin-top: 2px; }
+            .stats { display: flex; gap: 16px; flex-wrap: wrap; }
+            .stat { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; font-weight: 500; }
+            .stat ha-icon { --mdc-icon-size: 18px; }
+            .water-btn { background: #03a9f4; color: white; border: none; padding: 10px 16px; border-radius: 12px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(3, 169, 244, 0.3); margin-top: 4px; }
+            .water-btn:hover { background: #039be5; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(3, 169, 244, 0.4); }
+            .water-btn:active { transform: translateY(0); }
           </style>
         </ha-card>
       `;
@@ -195,7 +82,6 @@ class SmartPlantCard extends HTMLElement {
     const name = state.attributes.friendly_name ? state.attributes.friendly_name.split(' ')[0] : "Rostlina";
     const species = state.attributes.species || "";
     
-    // Find related entities
     const imgEntityId = entityId.replace('binary_sensor.', 'image.').replace('_needs_water', '_picture');
     const imgState = hass.states[imgEntityId] || hass.states[config.image_entity];
     const imgUrl = imgState ? imgState.attributes.entity_picture : "";
@@ -214,21 +100,11 @@ class SmartPlantCard extends HTMLElement {
     this.querySelector('#plant-image').src = imgUrl || "/static/images/card_media_placeholder.png";
     this.querySelector('#next-watering').textContent = nextWateringState ? this._formatDate(nextWateringState.state) : "Neznámo";
     
-    // Health translation mapping for fallback if state is still english
-    const healthMap = {
-      "Excellent": "Výborné",
-      "Very Good": "Velmi dobré",
-      "Good": "Dobré",
-      "Fair": "Ucházející",
-      "Poor": "Špatné",
-      "Critical": "Kritické",
-      "Needs attention": "Vyžaduje péči"
-    };
+    const healthMap = { "Excellent": "Výborné", "Very Good": "Velmi dobré", "Good": "Dobré", "Fair": "Ucházející", "Poor": "Špatné", "Critical": "Kritické", "Needs attention": "Vyžaduje péči" };
     let healthStr = healthState ? healthState.state : "Neznámo";
     healthStr = healthMap[healthStr] || healthStr;
     this.querySelector('#health-status').textContent = healthStr;
     
-    // Set health icon color
     const healthIcon = this.querySelector('#health-icon');
     if (healthState) {
       const h = healthState.state.toLowerCase();
@@ -237,7 +113,6 @@ class SmartPlantCard extends HTMLElement {
       else healthIcon.style.color = '#f44336';
     }
 
-    // Handle Care Tips
     const careTipsContainer = this.querySelector('#care-tips-container');
     const careTipsSpan = this.querySelector('#care-tips');
     if (careTipsState && careTipsState.state && careTipsState.state !== "unknown") {
@@ -271,18 +146,16 @@ class SmartPlantCard extends HTMLElement {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Show loading state or temporarily change the image to local preview
     const reader = new FileReader();
     reader.onload = async (e) => {
       const base64Data = e.target.result;
-      this.querySelector('#plant-image').src = base64Data; // instant preview
+      this.querySelector('#plant-image').src = base64Data;
 
       try {
         await this._hass.callService('smart_plant', 'upload_image', {
           entity_id: [this._config.entity],
           image_data: base64Data
         });
-        // You could show a success toast here
       } catch (err) {
         console.error("Failed to upload image:", err);
         alert("Nahrání obrázku se nezdařilo.");
@@ -307,7 +180,6 @@ class SmartPlantCard extends HTMLElement {
   }
 }
 
-// Card Metadata for the picker
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "smart-plant-card",

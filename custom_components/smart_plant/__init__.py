@@ -34,7 +34,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if "lovelace" in hass.data:
             resources = hass.data["lovelace"].get("resources")
             if resources and hasattr(resources, "async_items"):
-                url = "/smart_plant_static/smart-plant-card.js"
+                url = "/smart_plant_static/smart-plant-card.js?v=2"
                 if not any(res.get("url") == url for res in resources.async_items()):
                     await resources.async_create_item({"res_type": "module", "url": url})
                     _LOGGER.info("Successfully registered Smart Plant Card Lovelace resource")
@@ -67,10 +67,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                             f.write(data)
                     await hass.async_add_executor_job(write_file)
                     
-                    # Aktualizace obrázku v konfiguraci (bude uložen s absolutní cestou nebo zkopírován dál)
+                    # Aktualizace obrázku v konfiguraci
                     await coordinator.async_copy_custom_image(save_path)
                 elif file_path:
-                    # Klasický upload přes file_path
                     await coordinator.async_copy_custom_image(file_path)
 
     hass.services.async_register(DOMAIN, "upload_image", handle_upload_image)
