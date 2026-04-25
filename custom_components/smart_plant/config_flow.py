@@ -94,7 +94,9 @@ class SmartPlantConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 api = PerenualAPI(perenual_entry.data[CONF_PERENUAL_KEY], session)
             else:
                 # Use HA language for Wikipedia
-                lang = self.hass.config.language[:2] if self.hass.config.language else "en"
+                lang = "en"
+                if hasattr(self.hass.config, "language") and self.hass.config.language:
+                    lang = self.hass.config.language[:2]
                 api = WikipediaAPI(session, lang=lang)
             
             self._search_results = await api.search_plants(search_query)

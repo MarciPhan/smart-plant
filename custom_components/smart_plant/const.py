@@ -7,10 +7,7 @@ CONF_CLIENT_SECRET = "client_secret"
 CONF_PLANTS = "plants"
 CONF_USE_API = "use_api"
 
-# OpenPlantbook API constants
-OPB_BASE_URL = "https://open.plantbook.io/api/v1"
-OPB_TOKEN_URL = "https://open.plantbook.io/api/v1/token/"
-
+# API URL for Wikipedia
 WIKI_SEARCH_URL = "https://en.wikipedia.org/w/api.php"
 WIKI_SUMMARY_URL = "https://en.wikipedia.org/api/rest_v1/page/summary/"
 

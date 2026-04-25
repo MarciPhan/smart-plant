@@ -10,7 +10,7 @@
       },
       "perenual_setup": {
         "title": "Setup Perenual API",
-        "description": "Enter your API key from https://perenual.com/",
+        "description": "Enter your API key from https://perenual.com/user/developer",
         "data": {
           "perenual_key": "API Key"
         }

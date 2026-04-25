@@ -10,7 +10,7 @@
       },
       "perenual_setup": {
         "title": "Nastavení Perenual API",
-        "description": "Zadejte svůj API klíč z https://perenual.com/",
+        "description": "Zadejte svůj API klíč z https://perenual.com/user/developer",
         "data": {
           "perenual_key": "API Klíč"
         }
