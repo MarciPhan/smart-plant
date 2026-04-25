@@ -133,13 +133,29 @@ class SmartPlantCard extends HTMLElement {
     
     if (diff === 0) return "Dnes";
     if (diff === 1) return "Zítra";
-    if (diff < 0) return `Zpoždění ${Math.abs(diff)} dní!`;
-    return `za ${diff} dní`;
+    
+    const absDiff = Math.abs(diff);
+    let daysText = "dní";
+    if (absDiff === 1) daysText = "den";
+    else if (absDiff >= 2 && absDiff <= 4) daysText = "dny";
+
+    if (diff < 0) return `Zpoždění ${absDiff} ${daysText}!`;
+    return `za ${absDiff} ${daysText}`;
   }
 
-  _waterPlant() {
+  async _waterPlant() {
     const buttonId = this._config.entity.replace('binary_sensor.', 'button.').replace('_needs_water', '_mark_watered');
-    this._hass.callService('button', 'press', { entity_id: buttonId });
+    try {
+      await this._hass.callService('button', 'press', { entity_id: buttonId });
+      const event = new CustomEvent('hass-notification', {
+        detail: { message: "Rostlina zalita 💦" },
+        bubbles: true,
+        composed: true,
+      });
+      this.dispatchEvent(event);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   _uploadImage(event) {
@@ -156,9 +172,20 @@ class SmartPlantCard extends HTMLElement {
           entity_id: [this._config.entity],
           image_data: base64Data
         });
+        const ev = new CustomEvent('hass-notification', {
+          detail: { message: "Fotografie nahrána 📷" },
+          bubbles: true,
+          composed: true,
+        });
+        this.dispatchEvent(ev);
       } catch (err) {
         console.error("Failed to upload image:", err);
-        alert("Nahrání obrázku se nezdařilo.");
+        const ev = new CustomEvent('hass-notification', {
+          detail: { message: "Nahrání obrázku se nezdařilo ❌" },
+          bubbles: true,
+          composed: true,
+        });
+        this.dispatchEvent(ev);
       }
     };
     reader.readAsDataURL(file);

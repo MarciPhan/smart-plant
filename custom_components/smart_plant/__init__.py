@@ -45,34 +45,43 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     async def handle_upload_image(call):
         """Handle image upload service."""
-        entity_ids = call.data.get("entity_id")
+        entity_ids = call.data.get("entity_id", [])
+        if isinstance(entity_ids, str):
+            entity_ids = [entity_ids]
+            
         file_path = call.data.get("file_path")
         image_data = call.data.get("image_data")
         
-        # We need to find the coordinator for the entity
-        for entry_id, coordinator in hass.data[DOMAIN].items():
-            if isinstance(coordinator, dict): continue # Skip API configs
-            if any(entity.entity_id in entity_ids for entity in coordinator.hass.helpers.entity_component.async_get_entities(DOMAIN)):
-                if image_data:
-                    # Zpracování Base64 dat z karty
-                    import base64
-                    import uuid
-                    header, encoded = image_data.split(",", 1) if "," in image_data else ("", image_data)
-                    data = base64.b64decode(encoded)
-                    filename = f"custom_upload_{uuid.uuid4().hex[:8]}.jpg"
-                    save_path = os.path.join(static_path, filename)
-                    
-                    def write_file():
-                        with open(save_path, "wb") as f:
-                            f.write(data)
-                    await hass.async_add_executor_job(write_file)
-                    
-                    # Aktualizace obrázku v konfiguraci
-                    await coordinator.async_copy_custom_image(save_path)
-                elif file_path:
-                    await coordinator.async_copy_custom_image(file_path)
+        from homeassistant.helpers import entity_registry as er
+        registry = er.async_get(hass)
+        
+        for entity_id in entity_ids:
+            entity_entry = registry.async_get(entity_id)
+            if not entity_entry or entity_entry.config_entry_id not in hass.data[DOMAIN]:
+                continue
+                
+            coordinator = hass.data[DOMAIN][entity_entry.config_entry_id]
+            if isinstance(coordinator, dict): continue
+            
+            if image_data:
+                import base64
+                import uuid
+                header, encoded = image_data.split(",", 1) if "," in image_data else ("", image_data)
+                data = base64.b64decode(encoded)
+                filename = f"custom_upload_{uuid.uuid4().hex[:8]}.jpg"
+                save_path = os.path.join(static_path, filename)
+                
+                def write_file():
+                    with open(save_path, "wb") as f:
+                        f.write(data)
+                await hass.async_add_executor_job(write_file)
+                
+                await coordinator.async_copy_custom_image(save_path)
+            elif file_path:
+                await coordinator.async_copy_custom_image(file_path)
 
-    hass.services.async_register(DOMAIN, "upload_image", handle_upload_image)
+    if not hass.services.has_service(DOMAIN, "upload_image"):
+        hass.services.async_register(DOMAIN, "upload_image", handle_upload_image)
 
     if entry.unique_id == "smart_plant_perenual":
         # This is the Perenual API configuration
