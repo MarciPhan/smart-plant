@@ -33,16 +33,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.services.async_register(DOMAIN, "search_plants", handle_search)
 
     if entry.unique_id == "smart_plant_api":
-        # This is the global API configuration
+        # This is the global OpenPlantbook API configuration
         hass.data[DOMAIN]["api_config"] = entry.data
         return True
 
-    # This is an individual plant
-    # Ensure API is configured
-    if "api_config" not in hass.data[DOMAIN]:
-        _LOGGER.error("Smart Plant API not configured. Please configure it first.")
-        return False
+    if entry.unique_id == "smart_plant_perenual":
+        # This is the Perenual API configuration
+        hass.data[DOMAIN]["perenual_config"] = entry.data
+        return True
 
+    # This is an individual plant
     from .coordinator import SmartPlantCoordinator
     coordinator = SmartPlantCoordinator(hass, entry)
     await coordinator.async_config_entry_first_refresh()
