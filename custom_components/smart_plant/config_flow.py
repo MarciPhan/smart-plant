@@ -6,12 +6,13 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 import os
 import json
+import logging
 from .const import (
     DOMAIN, 
-    CONF_PERENUAL_KEY,
     ATTR_SPECIES, 
     ATTR_PID
 )
+_LOGGER = logging.getLogger(__name__)
 from .api import WikipediaAPI
 
 class SmartPlantConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
