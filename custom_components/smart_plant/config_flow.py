@@ -30,16 +30,14 @@ class SmartPlantConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
-        # Check for existing API keys
-        entries = self._async_current_entries()
-        perenual_entry = next((entry for entry in entries if entry.unique_id == "smart_plant_perenual"), None)
-        
         if user_input is not None:
-            source = user_input["source"]
-            if source == "perenual" and not perenual_entry:
-                return await self.async_step_perenual_setup()
+            self._selected_source = user_input["source"]
             
-            self._selected_source = source
+            if self._selected_source == "perenual":
+                entries = self._async_current_entries()
+                if not any(entry.unique_id == "smart_plant_perenual" for entry in entries):
+                    return await self.async_step_perenual_setup()
+            
             return await self.async_step_plant_setup()
 
         return self.async_show_form(
@@ -95,7 +93,9 @@ class SmartPlantConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 perenual_entry = next((entry for entry in entries if entry.unique_id == "smart_plant_perenual"), None)
                 api = PerenualAPI(perenual_entry.data[CONF_PERENUAL_KEY], session)
             else:
-                api = WikipediaAPI(session)
+                # Use HA language for Wikipedia
+                lang = self.hass.config.language[:2] if self.hass.config.language else "en"
+                api = WikipediaAPI(session, lang=lang)
             
             self._search_results = await api.search_plants(search_query)
             if not self._search_results:

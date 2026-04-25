@@ -2,26 +2,26 @@
   "config": {
     "step": {
       "user": {
-        "title": "Nastavení Smart Plant",
-        "description": "Zadejte své OpenPlantbook API údaje. Najdete je na https://open.plantbook.io/apikey/show/",
+        "title": "Vyberte zdroj dat",
+        "description": "Smart Plant může brát informace o rostlinách z různých zdrojů. Wikipedia je zdarma pro všechny, Perenual vyžaduje API klíč.",
         "data": {
-          "client_id": "Client ID",
-          "client_secret": "Client Secret"
+          "source": "Zdroj informací o rostlinách"
         }
       },
-      "api_setup": {
-        "title": "Nastavení API",
+      "perenual_setup": {
+        "title": "Nastavení Perenual API",
+        "description": "Zadejte svůj API klíč z https://perenual.com/",
         "data": {
-          "client_id": "Client ID",
-          "client_secret": "Client Secret"
+          "perenual_key": "API Klíč"
         }
       },
       "plant_setup": {
         "title": "Přidat rostlinu",
-        "description": "Zadejte název vaší rostliny a vyhledejte její druh v OpenPlantbook.",
+        "description": "Zadejte název své rostliny a vyhledejte její druh.",
         "data": {
-          "name": "Název (např. Monstera v obýváku)",
-          "species_search": "Hledat druh (např. Monstera deliciosa)"
+          "name": "Váš název (např. Monstera v rohu)",
+          "species_search": "Hledat druh (např. Monstera)",
+          "custom_image_url": "URL vlastní fotky (volitelné)"
         }
       },
       "select_species": {
@@ -33,11 +33,12 @@
       }
     },
     "error": {
-      "invalid_auth": "Neplatné API údaje.",
-      "no_plants_found": "Nebyly nalezeny žádné rostliny pro tento dotaz."
+      "invalid_api_key": "Neplatný API klíč.",
+      "no_plants_found": "Nebyly nalezeny žádné rostliny pro tento dotaz.",
+      "local_database_error": "Chyba při čtení lokální databáze."
     },
     "abort": {
-      "already_configured": "Zařízení je již nakonfigurováno"
+      "already_configured": "Toto API je již nakonfigurováno."
     }
   },
   "options": {
@@ -45,7 +46,8 @@
       "init": {
         "data": {
           "days_between_waterings": "Dny mezi zaléváním",
-          "health": "Zdraví"
+          "health": "Zdraví",
+          "custom_image_url": "Vlastní URL obrázku"
         }
       }
     }

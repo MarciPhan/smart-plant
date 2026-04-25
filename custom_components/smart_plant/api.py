@@ -74,9 +74,12 @@ class PerenualAPI:
 class WikipediaAPI:
     """Client for Wikipedia API."""
 
-    def __init__(self, session: aiohttp.ClientSession):
+    def __init__(self, session: aiohttp.ClientSession, lang: str = "en"):
         """Initialize."""
         self.session = session
+        self.lang = lang
+        self.search_url = f"https://{lang}.wikipedia.org/w/api.php"
+        self.summary_url = f"https://{lang}.wikipedia.org/api/rest_v1/page/summary/"
 
     async def search_plants(self, query: str):
         """Search for plants on Wikipedia."""
@@ -89,7 +92,7 @@ class WikipediaAPI:
         }
         try:
             async with asyncio.timeout(10):
-                response = await self.session.get(WIKI_SEARCH_URL, params=params)
+                response = await self.session.get(self.search_url, params=params)
                 if response.status == 200:
                     result = await response.json()
                     # OpenSearch returns [query, titles, summaries, links]
@@ -97,12 +100,12 @@ class WikipediaAPI:
                     return [{"pid": t, "alias": t, "display_pid": t, "source": "wikipedia"} for t in titles]
                 return []
         except Exception as err:
-            _LOGGER.error("Error searching Wikipedia: %s", err)
+            _LOGGER.error("Error searching Wikipedia (%s): %s", self.lang, err)
             return []
 
     async def get_plant_detail(self, title: str):
         """Get details for a specific plant from Wikipedia."""
-        url = f"{WIKI_SUMMARY_URL}{title.replace(' ', '_')}"
+        url = f"{self.summary_url}{title.replace(' ', '_')}"
         try:
             async with asyncio.timeout(10):
                 response = await self.session.get(url)

@@ -2,42 +2,43 @@
   "config": {
     "step": {
       "user": {
-        "title": "Smart Plant Setup",
-        "description": "Enter your OpenPlantbook API credentials. Get them at https://open.plantbook.io/apikey/show/",
+        "title": "Select Data Source",
+        "description": "Smart Plant can fetch plant data from various sources. Wikipedia is free for everyone, Perenual requires an API key.",
         "data": {
-          "client_id": "Client ID",
-          "client_secret": "Client Secret"
+          "source": "Plant Data Source"
         }
       },
-      "api_setup": {
-        "title": "API Setup",
+      "perenual_setup": {
+        "title": "Setup Perenual API",
+        "description": "Enter your API key from https://perenual.com/",
         "data": {
-          "client_id": "Client ID",
-          "client_secret": "Client Secret"
+          "perenual_key": "API Key"
         }
       },
       "plant_setup": {
         "title": "Add Plant",
-        "description": "Enter your plant's name and search for its species in OpenPlantbook.",
+        "description": "Enter your plant's name and search for its species.",
         "data": {
-          "name": "Name (e.g., Living Room Monstera)",
-          "species_search": "Search species (e.g., Monstera deliciosa)"
+          "name": "Your name (e.g. Corner Monstera)",
+          "species_search": "Search species (e.g. Monstera)",
+          "custom_image_url": "Custom Image URL (optional)"
         }
       },
       "select_species": {
         "title": "Select Species",
-        "description": "Select the best match from the search results.",
+        "description": "Select the best match from the results.",
         "data": {
           "pid": "Plant Species"
         }
       }
     },
     "error": {
-      "invalid_auth": "Invalid API credentials.",
-      "no_plants_found": "No plants found for this query."
+      "invalid_api_key": "Invalid API Key.",
+      "no_plants_found": "No plants found for this query.",
+      "local_database_error": "Error reading local database."
     },
     "abort": {
-      "already_configured": "Device is already configured"
+      "already_configured": "This API is already configured."
     }
   }
 }
