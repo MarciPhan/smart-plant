@@ -47,12 +47,31 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         """Handle image upload service."""
         entity_ids = call.data.get("entity_id")
         file_path = call.data.get("file_path")
+        image_data = call.data.get("image_data")
         
         # We need to find the coordinator for the entity
         for entry_id, coordinator in hass.data[DOMAIN].items():
             if isinstance(coordinator, dict): continue # Skip API configs
             if any(entity.entity_id in entity_ids for entity in coordinator.hass.helpers.entity_component.async_get_entities(DOMAIN)):
-                await coordinator.async_copy_custom_image(file_path)
+                if image_data:
+                    # Zpracování Base64 dat z karty
+                    import base64
+                    import uuid
+                    header, encoded = image_data.split(",", 1) if "," in image_data else ("", image_data)
+                    data = base64.b64decode(encoded)
+                    filename = f"custom_upload_{uuid.uuid4().hex[:8]}.jpg"
+                    save_path = os.path.join(static_path, filename)
+                    
+                    def write_file():
+                        with open(save_path, "wb") as f:
+                            f.write(data)
+                    await hass.async_add_executor_job(write_file)
+                    
+                    # Aktualizace obrázku v konfiguraci (bude uložen s absolutní cestou nebo zkopírován dál)
+                    await coordinator.async_copy_custom_image(save_path)
+                elif file_path:
+                    # Klasický upload přes file_path
+                    await coordinator.async_copy_custom_image(file_path)
 
     hass.services.async_register(DOMAIN, "upload_image", handle_upload_image)
 

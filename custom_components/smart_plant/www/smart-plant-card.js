@@ -6,12 +6,26 @@ class SmartPlantCard extends HTMLElement {
         <ha-card>
           <div class="container">
             <div class="image-container">
-              <img id="plant-image" src="" alt="Plant">
+              <img id="plant-image" src="" alt="Rostlina">
+              
+              <!-- Tlačítko pro nahrání fotky -->
+              <div class="upload-btn-container" title="Změnit fotku">
+                <ha-icon icon="mdi:camera-plus"></ha-icon>
+                <input type="file" id="image-upload" accept="image/*" />
+              </div>
+
               <div class="overlay">
                 <div class="header">
                   <h2 id="plant-name"></h2>
                   <p id="plant-species"></p>
                 </div>
+                
+                <!-- Nový blok pro rady k péči -->
+                <div class="care-tips" id="care-tips-container" style="display: none;">
+                  <ha-icon icon="mdi:information-outline"></ha-icon>
+                  <span id="care-tips"></span>
+                </div>
+
                 <div class="stats">
                   <div class="stat">
                     <ha-icon icon="mdi:water"></ha-icon>
@@ -24,7 +38,7 @@ class SmartPlantCard extends HTMLElement {
                 </div>
                 <button id="water-button" class="water-btn">
                   <ha-icon icon="mdi:water-pump"></ha-icon>
-                  Mark Watered
+                  Zalít rostlinu
                 </button>
               </div>
             </div>
@@ -55,11 +69,38 @@ class SmartPlantCard extends HTMLElement {
             .container:hover #plant-image {
               transform: scale(1.05);
             }
+            .upload-btn-container {
+              position: absolute;
+              top: 12px;
+              right: 12px;
+              background: rgba(0,0,0,0.5);
+              border-radius: 50%;
+              width: 40px;
+              height: 40px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: white;
+              cursor: pointer;
+              transition: all 0.2s ease;
+              z-index: 10;
+              backdrop-filter: blur(4px);
+            }
+            .upload-btn-container:hover {
+              background: rgba(0,0,0,0.8);
+              transform: scale(1.1);
+            }
+            #image-upload {
+              position: absolute;
+              top: 0; left: 0; width: 100%; height: 100%;
+              opacity: 0;
+              cursor: pointer;
+            }
             .overlay {
               position: absolute;
               bottom: 0; left: 0; right: 0;
               padding: 20px;
-              background: linear-gradient(transparent, rgba(0,0,0,0.8));
+              background: linear-gradient(transparent, rgba(0,0,0,0.85));
               color: white;
               display: flex;
               flex-direction: column;
@@ -77,9 +118,25 @@ class SmartPlantCard extends HTMLElement {
               opacity: 0.8;
               font-style: italic;
             }
+            .care-tips {
+              display: flex;
+              align-items: flex-start;
+              gap: 6px;
+              font-size: 0.85rem;
+              background: rgba(0,0,0,0.4);
+              padding: 8px;
+              border-radius: 8px;
+              backdrop-filter: blur(4px);
+            }
+            .care-tips ha-icon {
+              --mdc-icon-size: 16px;
+              flex-shrink: 0;
+              margin-top: 2px;
+            }
             .stats {
               display: flex;
               gap: 16px;
+              flex-wrap: wrap;
             }
             .stat {
               display: flex;
@@ -98,7 +155,7 @@ class SmartPlantCard extends HTMLElement {
               padding: 10px 16px;
               border-radius: 12px;
               font-weight: 600;
-              font-size: 0.9rem;
+              font-size: 0.95rem;
               cursor: pointer;
               display: flex;
               align-items: center;
@@ -106,6 +163,7 @@ class SmartPlantCard extends HTMLElement {
               gap: 8px;
               transition: all 0.2s ease;
               box-shadow: 0 4px 12px rgba(3, 169, 244, 0.3);
+              margin-top: 4px;
             }
             .water-btn:hover {
               background: #039be5;
@@ -120,6 +178,9 @@ class SmartPlantCard extends HTMLElement {
       `;
       this.content = this.querySelector('.container');
       this.querySelector('#water-button').onclick = () => this._waterPlant();
+      
+      const fileInput = this.querySelector('#image-upload');
+      fileInput.addEventListener('change', (e) => this._uploadImage(e));
     }
 
     const config = this._config;
@@ -127,17 +188,14 @@ class SmartPlantCard extends HTMLElement {
     const state = hass.states[entityId];
 
     if (!state) {
-      this.content.innerHTML = `<p style="padding: 16px;">Entity not found: ${entityId}</p>`;
+      this.content.innerHTML = \`<p style="padding: 16px;">Entita nebyla nalezena: \${entityId}</p>\`;
       return;
     }
 
-    // Get related entities
-    const deviceId = state.attributes.device_id; // This might not be directly available
-    // We assume standard naming or use config for other entities
-    const name = state.attributes.friendly_name.split(' ')[0] || "Plant";
+    const name = state.attributes.friendly_name ? state.attributes.friendly_name.split(' ')[0] : "Rostlina";
     const species = state.attributes.species || "";
     
-    // Find image entity for this device
+    // Find related entities
     const imgEntityId = entityId.replace('binary_sensor.', 'image.').replace('_needs_water', '_picture');
     const imgState = hass.states[imgEntityId] || hass.states[config.image_entity];
     const imgUrl = imgState ? imgState.attributes.entity_picture : "";
@@ -148,19 +206,45 @@ class SmartPlantCard extends HTMLElement {
     const healthId = entityId.replace('binary_sensor.', 'select.').replace('_needs_water', '_health');
     const healthState = hass.states[healthId];
 
+    const careTipsId = entityId.replace('binary_sensor.', 'sensor.').replace('_needs_water', '_care_tips');
+    const careTipsState = hass.states[careTipsId];
+
     this.querySelector('#plant-name').textContent = name;
     this.querySelector('#plant-species').textContent = species;
     this.querySelector('#plant-image').src = imgUrl || "/static/images/card_media_placeholder.png";
-    this.querySelector('#next-watering').textContent = nextWateringState ? this._formatDate(nextWateringState.state) : "Unknown";
-    this.querySelector('#health-status').textContent = healthState ? healthState.state : "Unknown";
+    this.querySelector('#next-watering').textContent = nextWateringState ? this._formatDate(nextWateringState.state) : "Neznámo";
+    
+    // Health translation mapping for fallback if state is still english
+    const healthMap = {
+      "Excellent": "Výborné",
+      "Very Good": "Velmi dobré",
+      "Good": "Dobré",
+      "Fair": "Ucházející",
+      "Poor": "Špatné",
+      "Critical": "Kritické",
+      "Needs attention": "Vyžaduje péči"
+    };
+    let healthStr = healthState ? healthState.state : "Neznámo";
+    healthStr = healthMap[healthStr] || healthStr;
+    this.querySelector('#health-status').textContent = healthStr;
     
     // Set health icon color
     const healthIcon = this.querySelector('#health-icon');
     if (healthState) {
       const h = healthState.state.toLowerCase();
-      if (h.includes('excellent')) healthIcon.style.color = '#4caf50';
-      else if (h.includes('good')) healthIcon.style.color = '#8bc34a';
+      if (h.includes('excellent') || h.includes('výborné')) healthIcon.style.color = '#4caf50';
+      else if (h.includes('good') || h.includes('dobré')) healthIcon.style.color = '#8bc34a';
       else healthIcon.style.color = '#f44336';
+    }
+
+    // Handle Care Tips
+    const careTipsContainer = this.querySelector('#care-tips-container');
+    const careTipsSpan = this.querySelector('#care-tips');
+    if (careTipsState && careTipsState.state && careTipsState.state !== "unknown") {
+      careTipsSpan.textContent = careTipsState.state;
+      careTipsContainer.style.display = 'flex';
+    } else {
+      careTipsContainer.style.display = 'none';
     }
 
     this._hass = hass;
@@ -174,8 +258,8 @@ class SmartPlantCard extends HTMLElement {
     
     if (diff === 0) return "Dnes";
     if (diff === 1) return "Zítra";
-    if (diff < 0) return `Zpoždění ${Math.abs(diff)} dní!`;
-    return `za ${diff} dní`;
+    if (diff < 0) return \`Zpoždění \${Math.abs(diff)} dní!\`;
+    return \`za \${diff} dní\`;
   }
 
   _waterPlant() {
@@ -183,9 +267,33 @@ class SmartPlantCard extends HTMLElement {
     this._hass.callService('button', 'press', { entity_id: buttonId });
   }
 
+  _uploadImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Show loading state or temporarily change the image to local preview
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64Data = e.target.result;
+      this.querySelector('#plant-image').src = base64Data; // instant preview
+
+      try {
+        await this._hass.callService('smart_plant', 'upload_image', {
+          entity_id: [this._config.entity],
+          image_data: base64Data
+        });
+        // You could show a success toast here
+      } catch (err) {
+        console.error("Failed to upload image:", err);
+        alert("Nahrání obrázku se nezdařilo.");
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
   setConfig(config) {
     if (!config.entity) {
-      throw new Error('Please define an entity');
+      throw new Error('Zvolte entitu');
     }
     this._config = config;
   }
@@ -204,7 +312,7 @@ window.customCards = window.customCards || [];
 window.customCards.push({
   type: "smart-plant-card",
   name: "Smart Plant Card",
-  description: "Krásná karta pro vaši rostlinu s fotkou a stavem zálivky.",
+  description: "Krásná česká karta pro vaši rostlinu s fotkou a stavem zálivky.",
   preview: true,
   documentationURL: "https://github.com/MarciPhan/smart-plant",
 });
@@ -215,19 +323,19 @@ class SmartPlantCardEditor extends HTMLElement {
   set hass(hass) {
     this._hass = hass;
     if (!this.content) {
-      this.innerHTML = `
+      this.innerHTML = \`
         <div class="card-config">
           <div class="row">
             <ha-entity-picker
-              .hass=${hass}
-              .value=${this._config?.entity}
-              .includeDomains=${["binary_sensor"]}
-              label="Plant Entity (Needs Water)"
-              @value-changed=${this._valueChanged}
+              .hass=\${hass}
+              .value=\${this._config?.entity}
+              .includeDomains=\${["binary_sensor"]}
+              label="Entita rostliny (potřeba zálivky)"
+              @value-changed=\${this._valueChanged}
             ></ha-entity-picker>
           </div>
         </div>
-      `;
+      \`;
       this.content = this.querySelector(".card-config");
     }
   }
