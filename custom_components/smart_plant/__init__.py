@@ -22,7 +22,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         os.makedirs(static_path, exist_ok=True)
     
     _LOGGER.debug("Registering static path: %s", static_path)
-    hass.http.register_static_path("/smart_plant_static", static_path, False)
+    try:
+        await hass.http.async_register_static_paths([
+            StaticPathConfig("/smart_plant_static", static_path, False)
+        ])
+    except Exception as e:
+        _LOGGER.error("Error registering static path: %s", e)
 
     # Register the custom card as a resource if possible
     try:
