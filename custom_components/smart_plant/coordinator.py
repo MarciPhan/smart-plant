@@ -37,6 +37,9 @@ class SmartPlantCoordinator(DataUpdateCoordinator):
         self.pid = data.get("pid")
         self.details = data.get("details", {})
         
+        # Custom Image
+        self.custom_image_url = options.get("custom_image_url")
+        
         # States (persisted in config entry options or private store)
         self.last_watered = options.get(ATTR_LAST_WATERED)
         if self.last_watered:
@@ -44,7 +47,7 @@ class SmartPlantCoordinator(DataUpdateCoordinator):
         else:
             self.last_watered = dt_util.now() - timedelta(days=7) # Default to a week ago
             
-        # Calculate default days from OPB details
+        # Calculate default days from details (API or Local)
         default_days = DEFAULT_DAYS_BETWEEN_WATERINGS
         min_moist = self.details.get("min_soil_moist")
         if min_moist is not None:
@@ -76,6 +79,7 @@ class SmartPlantCoordinator(DataUpdateCoordinator):
             "health": self.health,
             "watering_history": self.watering_history,
             "health_history": self.health_history,
+            "custom_image_url": self.custom_image_url,
         }
 
     async def mark_watered(self):
@@ -87,9 +91,7 @@ class SmartPlantCoordinator(DataUpdateCoordinator):
             actual_delta = (now - self.last_watered).days
             if actual_delta > 0:
                 # Weighted average: 80% current interval, 20% new observation
-                # This makes it learn slowly and stay stable
                 new_interval = round((self.days_between_waterings * 0.8) + (actual_delta * 0.2))
-                # Keep it within reasonable bounds
                 new_interval = max(1, min(60, new_interval))
                 
                 if new_interval != self.days_between_waterings:
@@ -123,6 +125,12 @@ class SmartPlantCoordinator(DataUpdateCoordinator):
         await self._async_update_options()
         await self.async_request_refresh()
 
+    async def set_custom_image(self, url):
+        """Update the custom image URL."""
+        self.custom_image_url = url
+        await self._async_update_options()
+        await self.async_request_refresh()
+
     async def _async_update_options(self):
         """Save current states to options."""
         new_options = dict(self.entry.options)
@@ -132,5 +140,6 @@ class SmartPlantCoordinator(DataUpdateCoordinator):
             "health": self.health,
             "watering_history": self.watering_history,
             "health_history": self.health_history,
+            "custom_image_url": self.custom_image_url,
         })
         self.hass.config_entries.async_update_entry(self.entry, options=new_options)

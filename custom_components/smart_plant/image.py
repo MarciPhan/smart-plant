@@ -24,7 +24,9 @@ class SmartPlantImage(SmartPlantEntity, ImageEntity):
     @property
     def image_url(self):
         """Return the image URL."""
-        return self._image_url
+        if self.coordinator.custom_image_url:
+            return self.coordinator.custom_image_url
+        return self.coordinator.details.get("image_url")
 
     async def async_image(self):
         """Return bytes of the image."""
