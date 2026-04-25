@@ -42,12 +42,21 @@ class SmartPlantCareTipsSensor(SmartPlantEntity, SensorEntity):
         tips = []
         
         # Soil Moisture
-        if d.get("min_soil_moist"):
-            tips.append(f"💧 Min. vlhkost: {d['min_soil_moist']}%")
+        moist = d.get("min_soil_moist", 40)
+        tips.append(f"💧 Min. vlhkost: {moist}%")
         
         # Watering intensity
-        if d.get("watering"):
-            tips.append(f"🚿 Zálivka: {d['watering']}")
+        watering = d.get("watering")
+        if not watering:
+            if moist <= 20: watering = "Minimální (nechat proschnout)"
+            elif moist <= 40: watering = "Střední (mírně vlhké)"
+            else: watering = "Pravidelná (stále vlhké)"
+        else:
+            # Počeštění anglických z API
+            trans = {"Frequent": "Častá", "Average": "Střední", "Minimum": "Minimální"}
+            watering = trans.get(watering, watering)
+            
+        tips.append(f"🚿 Zálivka: {watering}")
             
         # Sunlight
         sun = d.get("sunlight")
@@ -56,13 +65,21 @@ class SmartPlantCareTipsSensor(SmartPlantEntity, SensorEntity):
                 sun_str = ", ".join(sun)
             else:
                 sun_str = str(sun)
-            tips.append(f"☀️ Světlo: {sun_str}")
+            # Částečný překlad z Perenual API
+            sun_str = sun_str.replace("full sun", "Plné slunce").replace("part shade", "Polostín").replace("part sun", "Polostín")
+        else:
+            sun_str = "Světlé stanoviště"
+            
+        tips.append(f"☀️ Světlo: {sun_str}")
             
         # Temperature
-        if d.get("min_temp"):
-            tips.append(f"🌡️ Teplota: {d['min_temp']}-{d.get('max_temp', '?')}°C")
+        min_t = d.get("min_temp")
+        if min_t:
+            tips.append(f"🌡️ Teplota: {min_t}-{d.get('max_temp', '?')}°C")
+        else:
+            tips.append("🌡️ Pokojová (18-24°C)")
             
-        return " | ".join(tips) if tips else "Informace o nárocích nejsou k dispozici"
+        return " | ".join(tips)
 
     @property
     def extra_state_attributes(self):
