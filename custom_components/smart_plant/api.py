@@ -3,8 +3,6 @@ import asyncio
 import aiohttp
 
 from .const import (
-    OPB_BASE_URL, 
-    OPB_TOKEN_URL, 
     WIKI_SEARCH_URL, 
     WIKI_SUMMARY_URL, 
     MOISTURE_HEURISTICS,
