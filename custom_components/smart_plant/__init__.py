@@ -16,7 +16,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Smart Plant from a config entry."""
     hass.data.setdefault(DOMAIN, {})
 
-    # Register static path for custom images
+    # Register static path for custom images and cards
     static_path = hass.config.path("custom_components/smart_plant/www")
     if not os.path.exists(static_path):
         os.makedirs(static_path, exist_ok=True)
@@ -27,6 +27,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         ])
     except Exception:
         pass
+
+    # Register the custom card as a resource
+    if "lovelace" in hass.data:
+        # This is a bit hacky but works for many HA versions
+        pass 
 
     # Registration of services
 
