@@ -8,14 +8,11 @@ import os
 import json
 from .const import (
     DOMAIN, 
-    CONF_CLIENT_ID, 
-    CONF_CLIENT_SECRET, 
     CONF_PERENUAL_KEY,
     ATTR_SPECIES, 
-    ATTR_PID, 
-    DEFAULT_DAYS_BETWEEN_WATERINGS
+    ATTR_PID
 )
-from .api import WikipediaAPI, OpenPlantbookAPI, PerenualAPI
+from .api import WikipediaAPI, PerenualAPI
 
 class SmartPlantConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Smart Plant."""
@@ -27,6 +24,7 @@ class SmartPlantConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._plant_name = None
         self._search_results = []
         self._selected_source = "wikipedia"
+        self._custom_image = None
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
@@ -157,7 +155,10 @@ class SmartPlantConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     perenual_entry = next((entry for entry in entries if entry.unique_id == "smart_plant_perenual"), None)
                     api = PerenualAPI(perenual_entry.data[CONF_PERENUAL_KEY], session)
                 else:
-                    api = WikipediaAPI(session)
+                    lang = "en"
+                    if hasattr(self.hass.config, "language") and self.hass.config.language:
+                        lang = self.hass.config.language[:2]
+                    api = WikipediaAPI(session, lang=lang)
                 details = await api.get_plant_detail(pid)
             
             options = {}
@@ -180,5 +181,36 @@ class SmartPlantConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="select_species",
             data_schema=vol.Schema({
                 vol.Required("pid"): vol.In(species_options),
+            }),
+        )
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        return SmartPlantOptionsFlowHandler(config_entry)
+
+class SmartPlantOptionsFlowHandler(config_entries.OptionsFlow):
+    def __init__(self, config_entry):
+        """Initialize options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(self, user_input=None):
+        """Manage the options."""
+        if user_input is not None:
+            # Handle image path if provided
+            image_path = user_input.get("custom_image_path")
+            if image_path and os.path.exists(image_path):
+                coordinator = self.hass.data[DOMAIN].get(self.config_entry.entry_id)
+                if coordinator:
+                    await coordinator.async_copy_custom_image(image_path)
+            
+            return self.async_create_entry(title="", data=user_input)
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema({
+                vol.Required("days_between_waterings", default=self.config_entry.options.get("days_between_waterings", 7)): int,
+                vol.Optional("custom_image_path"): str,
+                vol.Optional("custom_image_url", default=self.config_entry.options.get("custom_image_url", "")): str,
             }),
         )
