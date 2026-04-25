@@ -11,16 +11,7 @@ CONF_USE_API = "use_api"
 WIKI_SEARCH_URL = "https://en.wikipedia.org/w/api.php"
 WIKI_SUMMARY_URL = "https://en.wikipedia.org/api/rest_v1/page/summary/"
 
-PERENUAL_BASE_URL = "https://perenual.com/api"
-CONF_PERENUAL_KEY = "perenual_key"
 
-# Mapping Perenual watering to min_soil_moist
-PERENUAL_WATERING_MAPPING = {
-    "frequent": 60,
-    "average": 40,
-    "minimum": 20,
-    "none": 5,
-}
 
 # Moisture heuristics (keywords -> min_soil_moist)
 MOISTURE_HEURISTICS = {

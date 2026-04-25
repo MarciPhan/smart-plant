@@ -65,7 +65,7 @@ class SmartPlantCareTipsSensor(SmartPlantEntity, SensorEntity):
                 sun_str = ", ".join(sun)
             else:
                 sun_str = str(sun)
-            # Částečný překlad z Perenual API
+            # Částečný překlad z API zdrojů
             sun_str = sun_str.replace("full sun", "Plné slunce").replace("part shade", "Polostín").replace("part sun", "Polostín")
         else:
             sun_str = "Světlé stanoviště"

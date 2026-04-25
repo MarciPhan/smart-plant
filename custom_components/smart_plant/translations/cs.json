@@ -2,22 +2,8 @@
   "config": {
     "step": {
       "user": {
-        "title": "Vyberte zdroj dat",
-        "description": "Smart Plant může brát informace o rostlinách z různých zdrojů. Wikipedia je zdarma pro všechny, Perenual vyžaduje API klíč.",
-        "data": {
-          "source": "Zdroj informací o rostlinách"
-        }
-      },
-      "perenual_setup": {
-        "title": "Nastavení Perenual API",
-        "description": "Zadejte svůj API klíč z https://perenual.com/user/developer",
-        "data": {
-          "perenual_key": "API Klíč"
-        }
-      },
-      "plant_setup": {
         "title": "Přidat rostlinu",
-        "description": "Zadejte název své rostliny a vyhledejte její druh.",
+        "description": "Zadejte název své rostliny a vyhledejte její druh. Systém nejprve prohledá lokální databázi a pokud nenajde, vyhledá ji na Wikipedii.",
         "data": {
           "name": "Váš název (např. Monstera v rohu)",
           "species_search": "Hledat druh (např. Monstera)",

@@ -85,11 +85,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if not hass.services.has_service(DOMAIN, "upload_image"):
         hass.services.async_register(DOMAIN, "upload_image", handle_upload_image)
 
-    if entry.unique_id == "smart_plant_perenual":
-        # This is the Perenual API configuration
-        hass.data[DOMAIN]["perenual_config"] = entry.data
-        return True
-
     # This is an individual plant
     from .coordinator import SmartPlantCoordinator
     coordinator = SmartPlantCoordinator(hass, entry)
@@ -104,9 +99,5 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    if entry.unique_id == "smart_plant_perenual":
-        hass.data[DOMAIN].pop("perenual_config", None)
-        return True
-
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     return unload_ok

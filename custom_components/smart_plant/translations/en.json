@@ -2,22 +2,8 @@
   "config": {
     "step": {
       "user": {
-        "title": "Select Data Source",
-        "description": "Smart Plant can fetch plant data from various sources. Wikipedia is free for everyone, Perenual requires an API key.",
-        "data": {
-          "source": "Plant Data Source"
-        }
-      },
-      "perenual_setup": {
-        "title": "Setup Perenual API",
-        "description": "Enter your API key from https://perenual.com/user/developer",
-        "data": {
-          "perenual_key": "API Key"
-        }
-      },
-      "plant_setup": {
         "title": "Add Plant",
-        "description": "Enter your plant's name and search for its species.",
+        "description": "Enter your plant's name and search for its species. The system will search the local database first and fallback to Wikipedia.",
         "data": {
           "name": "Your name (e.g. Corner Monstera)",
           "species_search": "Search species (e.g. Monstera)",
