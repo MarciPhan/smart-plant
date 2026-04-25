@@ -21,17 +21,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if not os.path.exists(static_path):
         os.makedirs(static_path, exist_ok=True)
     
-    try:
-        await hass.http.async_register_static_paths([
-            StaticPathConfig("/smart_plant_static", static_path, False)
-        ])
-    except Exception:
-        pass
+    _LOGGER.debug("Registering static path: %s", static_path)
+    hass.http.register_static_path("/smart_plant_static", static_path, False)
 
-    # Register the custom card as a resource
-    if "lovelace" in hass.data:
-        # This is a bit hacky but works for many HA versions
-        pass 
+    # Register the custom card as a resource if possible
+    try:
+        from homeassistant.components.lovelace.resources import ResourceStorageCollection
+        if "lovelace" in hass.data:
+            resources = hass.data["lovelace"]["resources"]
+            if isinstance(resources, ResourceStorageCollection):
+                url = "/smart_plant_static/smart-plant-card.js"
+                found = False
+                for res in resources.async_items():
+                    if res.get("url") == url:
+                        found = True
+                        break
+                if not found:
+                    await resources.async_create_item({"res_type": "module", "url": url})
+    except Exception as e:
+        _LOGGER.debug("Could not auto-register Lovelace resource: %s", e)
 
     # Registration of services
 
