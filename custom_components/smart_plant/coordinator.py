@@ -131,6 +131,30 @@ class SmartPlantCoordinator(DataUpdateCoordinator):
         await self._async_update_options()
         await self.async_request_refresh()
 
+    async def async_copy_custom_image(self, source_path):
+        """Copy a local file to the www folder and set as custom image."""
+        if not os.path.exists(source_path):
+            _LOGGER.error("Source image file not found: %s", source_path)
+            return False
+        
+        filename = os.path.basename(source_path)
+        dest_dir = self.hass.config.path("custom_components/smart_plant/www")
+        if not os.path.exists(dest_dir):
+            os.makedirs(dest_dir, exist_ok=True)
+            
+        dest_path = os.path.join(dest_dir, filename)
+        
+        try:
+            import shutil
+            await self.hass.async_add_executor_job(shutil.copy2, source_path, dest_path)
+            # Set the URL to our static path
+            url = f"/smart_plant_static/{filename}"
+            await self.set_custom_image(url)
+            return True
+        except Exception as e:
+            _LOGGER.error("Failed to copy image: %s", e)
+            return False
+
     async def _async_update_options(self):
         """Save current states to options."""
         new_options = dict(self.entry.options)

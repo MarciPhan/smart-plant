@@ -13,3 +13,11 @@ set_custom_image:
       description: The URL of the image.
       example: "https://example.com/my_plant.jpg"
       required: true
+
+upload_image:
+  description: Copy a local image file to Smart Plant and set it as the plant photo.
+  fields:
+    file_path:
+      description: The absolute path to the image file on the server.
+      example: "/home/user/photos/plant.jpg"
+      required: true

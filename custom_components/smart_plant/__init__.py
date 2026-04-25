@@ -1,10 +1,10 @@
-"""The Smart Plant integration."""
 import logging
+import os
 import asyncio
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-
+from homeassistant.components.http import StaticPathConfig
 from .const import DOMAIN, CONF_CLIENT_ID, CONF_CLIENT_SECRET
 from .api import OpenPlantbookAPI
 
@@ -15,6 +15,18 @@ PLATFORMS = ["binary_sensor", "sensor", "button", "number", "select", "date", "i
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Smart Plant from a config entry."""
     hass.data.setdefault(DOMAIN, {})
+
+    # Register static path for custom images
+    static_path = hass.config.path("custom_components/smart_plant/www")
+    if not os.path.exists(static_path):
+        os.makedirs(static_path, exist_ok=True)
+    
+    try:
+        await hass.http.async_register_static_paths([
+            StaticPathConfig("/smart_plant_static", static_path, False)
+        ])
+    except Exception:
+        pass
 
     async def handle_search(call):
         """Handle the search service call."""
@@ -31,6 +43,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.bus.async_fire("smart_plant_search_results", {"query": query, "results": results})
 
     hass.services.async_register(DOMAIN, "search_plants", handle_search)
+
+    async def handle_upload_image(call):
+        """Handle image upload service."""
+        entity_ids = call.data.get("entity_id")
+        file_path = call.data.get("file_path")
+        
+        # We need to find the coordinator for the entity
+        for entry_id, coordinator in hass.data[DOMAIN].items():
+            if isinstance(coordinator, dict): continue # Skip API configs
+            if any(entity.entity_id in entity_ids for entity in coordinator.hass.helpers.entity_component.async_get_entities(DOMAIN)):
+                await coordinator.async_copy_custom_image(file_path)
+
+    hass.services.async_register(DOMAIN, "upload_image", handle_upload_image)
 
     if entry.unique_id == "smart_plant_api":
         # This is the global OpenPlantbook API configuration
