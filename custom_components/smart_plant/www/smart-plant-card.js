@@ -190,9 +190,62 @@ class SmartPlantCard extends HTMLElement {
     this._config = config;
   }
 
-  getCardSize() {
-    return 3;
+  static getStubConfig() {
+    return { entity: "binary_sensor.rymovnik_needs_water" };
+  }
+
+  static getConfigElement() {
+    return document.createElement("smart-plant-card-editor");
   }
 }
 
+// Card Metadata for the picker
+window.customCards = window.customCards || [];
+window.customCards.push({
+  type: "smart-plant-card",
+  name: "Smart Plant Card",
+  description: "Krásná karta pro vaši rostlinu s fotkou a stavem zálivky.",
+  preview: true,
+  documentationURL: "https://github.com/MarciPhan/smart-plant",
+});
+
 customElements.define('smart-plant-card', SmartPlantCard);
+
+class SmartPlantCardEditor extends HTMLElement {
+  set hass(hass) {
+    this._hass = hass;
+    if (!this.content) {
+      this.innerHTML = `
+        <div class="card-config">
+          <div class="row">
+            <ha-entity-picker
+              .hass=${hass}
+              .value=${this._config?.entity}
+              .includeDomains=${["binary_sensor"]}
+              label="Plant Entity (Needs Water)"
+              @value-changed=${this._valueChanged}
+            ></ha-entity-picker>
+          </div>
+        </div>
+      `;
+      this.content = this.querySelector(".card-config");
+    }
+  }
+
+  setConfig(config) {
+    this._config = config;
+  }
+
+  _valueChanged(ev) {
+    if (!this._config || !this._hass) return;
+    const value = ev.detail.value;
+    const event = new CustomEvent("config-changed", {
+      detail: { config: { ...this._config, entity: value } },
+      bubbles: true,
+      composed: true,
+    });
+    this.dispatchEvent(event);
+  }
+}
+
+customElements.define("smart-plant-card-editor", SmartPlantCardEditor);
