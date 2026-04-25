@@ -188,7 +188,7 @@ class SmartPlantCard extends HTMLElement {
     const state = hass.states[entityId];
 
     if (!state) {
-      this.content.innerHTML = \`<p style="padding: 16px;">Entita nebyla nalezena: \${entityId}</p>\`;
+      this.content.innerHTML = `<p style="padding: 16px;">Entita nebyla nalezena: ${entityId}</p>`;
       return;
     }
 
@@ -258,8 +258,8 @@ class SmartPlantCard extends HTMLElement {
     
     if (diff === 0) return "Dnes";
     if (diff === 1) return "Zítra";
-    if (diff < 0) return \`Zpoždění \${Math.abs(diff)} dní!\`;
-    return \`za \${diff} dní\`;
+    if (diff < 0) return `Zpoždění ${Math.abs(diff)} dní!`;
+    return `za ${diff} dní`;
   }
 
   _waterPlant() {
@@ -323,19 +323,19 @@ class SmartPlantCardEditor extends HTMLElement {
   set hass(hass) {
     this._hass = hass;
     if (!this.content) {
-      this.innerHTML = \`
+      this.innerHTML = `
         <div class="card-config">
           <div class="row">
             <ha-entity-picker
-              .hass=\${hass}
-              .value=\${this._config?.entity}
-              .includeDomains=\${["binary_sensor"]}
+              .hass=${hass}
+              .value=${this._config?.entity}
+              .includeDomains=${["binary_sensor"]}
               label="Entita rostliny (potřeba zálivky)"
-              @value-changed=\${this._valueChanged}
+              @value-changed=${this._valueChanged}
             ></ha-entity-picker>
           </div>
         </div>
-      \`;
+      `;
       this.content = this.querySelector(".card-config");
     }
   }
